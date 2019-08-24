@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <math.h> // isinf
 #include <tchar.h>
 
 // Data
@@ -87,12 +88,23 @@ int main(int, char**)
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        if (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+        double timeout = ImGui::GetEventWaitingTimeout();
+        if (timeout > 0.0)
         {
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-            continue;
+            DWORD timeout_ms = isinf(timeout) ? INFINITE : (DWORD)(1000.0 * timeout);
+            ::MsgWaitForMultipleObjects(0, NULL, FALSE, timeout_ms, QS_ALLEVENTS);
         }
+        BOOL got_message;
+        do
+        {
+            got_message = ::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
+            if (got_message)
+            {
+                ::TranslateMessage(&msg);
+                ::DispatchMessage(&msg);
+            }
+        }
+        while(got_message);
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
