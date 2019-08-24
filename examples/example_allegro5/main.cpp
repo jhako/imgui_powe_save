@@ -1,6 +1,7 @@
 // dear imgui: standalone example application for Allegro 5
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
+#include <math.h> // isinf
 #include <stdint.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -64,17 +65,34 @@ int main(int, char**)
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         ALLEGRO_EVENT ev;
-        while (al_get_next_event(queue, &ev))
+        double timeout = ImGui::GetEventWaitingTimeout();
+        bool got_event = false;
+
+        if (isinf(timeout))
         {
-            ImGui_ImplAllegro5_ProcessEvent(&ev);
-            if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-                running = false;
-            if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+            al_wait_for_event(queue, &ev);
+            got_event = true;
+        }
+        else
+        {
+            got_event = al_wait_for_event_timed(queue, &ev, timeout);
+        }
+
+        if (got_event)
+        {
+            do
             {
-                ImGui_ImplAllegro5_InvalidateDeviceObjects();
-                al_acknowledge_resize(display);
-                ImGui_ImplAllegro5_CreateDeviceObjects();
+                ImGui_ImplAllegro5_ProcessEvent(&ev);
+                if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+                    running = false;
+                if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+                {
+                    ImGui_ImplAllegro5_InvalidateDeviceObjects();
+                    al_acknowledge_resize(display);
+                    ImGui_ImplAllegro5_CreateDeviceObjects();
+                }
             }
+            while (al_get_next_event(queue, &ev));
         }
 
         // Start the Dear ImGui frame
