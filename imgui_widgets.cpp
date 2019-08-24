@@ -4052,6 +4052,9 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         // Draw blinking cursor
         if (render_cursor)
         {
+            // 6fps to capture both the frequency and duty cycle defined below.
+            SetFrameRateRequirement(GetID("imgui blinking cursor"), io.ConfigInputTextCursorBlink ? 6.0f : 0.0f);
+
             state->CursorAnim += io.DeltaTime;
             bool cursor_is_visible = (!g.IO.ConfigInputTextCursorBlink) || (state->CursorAnim <= 0.0f) || ImFmod(state->CursorAnim, 1.20f) <= 0.80f;
             ImVec2 cursor_screen_pos = draw_pos + cursor_offset - draw_scroll;

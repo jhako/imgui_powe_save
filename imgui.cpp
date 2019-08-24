@@ -1226,6 +1226,7 @@ ImGuiIO::ImGuiIO()
         KeyMap[i] = -1;
     KeyRepeatDelay = 0.250f;
     KeyRepeatRate = 0.050f;
+    PowerSavingMinFrameRate = 0.0f;
     UserData = NULL;
 
     Fonts = NULL;
@@ -3641,6 +3642,33 @@ static void NewFrameSanityChecks()
     // Perform simple check: the beta io.ConfigWindowsResizeFromEdges option requires back-end to honor mouse cursor changes and set the ImGuiBackendFlags_HasMouseCursors flag accordingly.
     if (g.IO.ConfigWindowsResizeFromEdges && !(g.IO.BackendFlags & ImGuiBackendFlags_HasMouseCursors))
         g.IO.ConfigWindowsResizeFromEdges = false;
+}
+
+double ImGui::GetEventWaitingTimeout()
+{
+    ImGuiContext& g = *GImGui;
+
+    if (!(g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode))
+        return 0.0;
+
+    float highest_frame_rate = g.IO.PowerSavingMinFrameRate;
+    for (int i = 0; i < g.FrameRateRequirements.GetSize(); i++)
+        if (g.FrameRateRequirements.Data[i] > highest_frame_rate)
+            highest_frame_rate = g.FrameRateRequirements.Data[i];
+
+    double timeout = 1.0 / highest_frame_rate;
+    timeout = ImMax(0.0, timeout);
+
+    return timeout;
+}
+
+void ImGui::SetFrameRateRequirement(ImGuiID id, float min_frame_rate)
+{
+    ImGuiContext& g = *GImGui;
+
+    float* requirement = g.FrameRateRequirements.GetOrAddByKey(id);
+
+    *requirement = min_frame_rate;
 }
 
 void ImGui::NewFrame()

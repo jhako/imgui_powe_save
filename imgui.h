@@ -223,6 +223,15 @@ namespace ImGui
     IMGUI_API void          Render();                                   // ends the Dear ImGui frame, finalize the draw data. You can get call GetDrawData() to obtain it and run your rendering function. (Obsolete: this used to call io.RenderDrawListsFn(). Nowadays, we allow and prefer calling your render function yourself.)
     IMGUI_API ImDrawData*   GetDrawData();                              // valid after Render() and until the next call to NewFrame(). this is what you have to render.
 
+    // Power saving mode
+    // Disabled by default; enabled by setting ImGuiConfigFlags_EnablePowerSavingMode to true in ImGuiIO.ConfigFlags.
+    // When enabled, and if implemented by the platform binding (using the GetEventWaitingTimeout() method), the frame rate will be reduced by waiting for inputs (i.e. blocking/sleeping) rather than polling, for the duration returned by GetEventWaitingTimeout().
+    // The minimum frame rate is controlled by ImGuiIO.PowerSavingMinFrameRate (default to 0).
+    // If you need to increase the minimum frame rate, for example when playing animations, use SetFrameRateRequirement() to request a minimum frame rate; you can later set it to zero if/when the animation is over.
+    // If multiple requirements have been set (e.g. for a 30-fps animation and a cursor blinking at 1 Hz -> 2fps), the minimum frame rate will be the highest one.
+    IMGUI_API double        GetEventWaitingTimeout(); // in seconds; note that it can be 0.0 (in which case you might want to poll) or infinite (in which case you will need to call a non-timeout event waiting function).
+    IMGUI_API void          SetFrameRateRequirement(ImGuiID id, float min_frame_rate); // in fps
+
     // Demo, Debug, Information
     IMGUI_API void          ShowDemoWindow(bool* p_open = NULL);        // create Demo window (previously called ShowTestWindow). demonstrate most ImGui features. call this to learn about the library! try to make it always available in your application!
     IMGUI_API void          ShowAboutWindow(bool* p_open = NULL);       // create About window. display Dear ImGui version, credits and build/system information.
@@ -1001,6 +1010,7 @@ enum ImGuiConfigFlags_
     ImGuiConfigFlags_NavNoCaptureKeyboard   = 1 << 3,   // Instruct navigation to not set the io.WantCaptureKeyboard flag when io.NavActive is set.
     ImGuiConfigFlags_NoMouse                = 1 << 4,   // Instruct imgui to clear mouse position/buttons in NewFrame(). This allows ignoring the mouse information set by the back-end.
     ImGuiConfigFlags_NoMouseCursorChange    = 1 << 5,   // Instruct back-end to not alter mouse cursor shape and visibility. Use if the back-end cursor changes are interfering with yours and you don't want to use SetMouseCursor() to change mouse cursor. You may want to honor requests from imgui by reading GetMouseCursor() yourself instead.
+    ImGuiConfigFlags_EnablePowerSavingMode  = 1 << 6,   // Instruct imgui to adjust the frame rate dynamically in order to reduce power consumption. Use SetFrameRateRequirement() to control the minimum frame rate.
 
     // User storage (to allow your back-end/engine to communicate to code that may be shared between multiple projects. Those flags are not used by core Dear ImGui)
     ImGuiConfigFlags_IsSRGB                 = 1 << 20,  // Application is SRGB-aware.
@@ -1346,6 +1356,7 @@ struct ImGuiIO
     int         KeyMap[ImGuiKey_COUNT];         // <unset>          // Map of indices into the KeysDown[512] entries array which represent your "native" keyboard state.
     float       KeyRepeatDelay;                 // = 0.250f         // When holding a key/button, time before it starts repeating, in seconds (for buttons in Repeat mode, etc.).
     float       KeyRepeatRate;                  // = 0.050f         // When holding a key/button, rate at which it repeats, in seconds.
+    float       PowerSavingMinFrameRate;        // = 0.0f           // Minimum frame rate, when power saving mode is enabled and if no other frame rate requirement was set using SetFrameRateRequirement().
     void*       UserData;                       // = NULL           // Store your own data for retrieval by callbacks.
 
     ImFontAtlas*Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single texture.
