@@ -1226,7 +1226,6 @@ ImGuiIO::ImGuiIO()
         KeyMap[i] = -1;
     KeyRepeatDelay = 0.250f;
     KeyRepeatRate = 0.050f;
-    PowerSavingMinFrameRate = 0.0f;
     UserData = NULL;
 
     Fonts = NULL;

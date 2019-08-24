@@ -226,7 +226,6 @@ namespace ImGui
     // Power saving mode
     // Disabled by default; enabled by setting ImGuiConfigFlags_EnablePowerSavingMode to true in ImGuiIO.ConfigFlags.
     // When enabled, and if implemented by the platform binding (using the GetEventWaitingTimeout() method), the frame rate will be reduced by waiting for inputs (i.e. blocking/sleeping) rather than polling, for the duration returned by GetEventWaitingTimeout().
-    // The minimum frame rate is controlled by ImGuiIO.PowerSavingMinFrameRate (default to 0).
     // If you need to increase the minimum frame rate, for example when playing animations, use SetNextFrameBefore() to request a maximum delay before the next frame.
     IMGUI_API double        GetEventWaitingTimeout(); // in seconds; note that it can be zero (in which case you might want to poll) or infinity (in which case you will need to call a non-timeout event waiting function).
     IMGUI_API void          SetNextFrameBefore(double time); // in seconds
@@ -1355,7 +1354,6 @@ struct ImGuiIO
     int         KeyMap[ImGuiKey_COUNT];         // <unset>          // Map of indices into the KeysDown[512] entries array which represent your "native" keyboard state.
     float       KeyRepeatDelay;                 // = 0.250f         // When holding a key/button, time before it starts repeating, in seconds (for buttons in Repeat mode, etc.).
     float       KeyRepeatRate;                  // = 0.050f         // When holding a key/button, rate at which it repeats, in seconds.
-    float       PowerSavingMinFrameRate;        // = 0.0f           // Minimum frame rate, when power saving mode is enabled and if no other frame rate requirement was set using SetNextFrameBefore().
     void*       UserData;                       // = NULL           // Store your own data for retrieval by callbacks.
 
     ImFontAtlas*Fonts;                          // <auto>           // Font atlas: load, rasterize and pack one or more fonts into a single texture.
