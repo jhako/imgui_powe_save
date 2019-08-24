@@ -3648,31 +3648,14 @@ double ImGui::GetEventWaitingTimeout()
 {
     ImGuiContext& g = *GImGui;
 
-    if (!(g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode))
-        return 0.0;
-
-    float highest_frame_rate = g.IO.PowerSavingMinFrameRate;
-
-    if (g.Blinking)
-        highest_frame_rate = ImMax(highest_frame_rate, 6.0f); // 6fps to capture both the frequency and duty cycle of the default text input cursor.
-
-    for (int i = 0; i < g.UserFrameRateRequirements.GetSize(); i++)
-        if (g.UserFrameRateRequirements.Data[i] > highest_frame_rate)
-            highest_frame_rate = g.UserFrameRateRequirements.Data[i];
-
-    double timeout = 1.0 / highest_frame_rate;
-    timeout = ImMax(0.0, timeout);
-
-    return timeout;
+    return (g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) ? g.MaxTimeBeforeNextFrame : 0.0;
 }
 
-void ImGui::SetFrameRateRequirement(ImGuiID id, float min_frame_rate)
+void ImGui::SetNextFrameBefore(double time)
 {
     ImGuiContext& g = *GImGui;
 
-    float* requirement = g.UserFrameRateRequirements.GetOrAddByKey(id);
-
-    *requirement = min_frame_rate;
+    g.MaxTimeBeforeNextFrame = ImMin(g.MaxTimeBeforeNextFrame, time);
 }
 
 void ImGui::NewFrame()
@@ -3715,7 +3698,7 @@ void ImGui::NewFrame()
     g.FrameCount += 1;
     g.TooltipOverrideCount = 0;
     g.WindowsActiveCount = 0;
-    g.Blinking = false;
+    g.MaxTimeBeforeNextFrame = INFINITY;
 
     // Setup current font and draw list shared data
     g.IO.Fonts->Locked = true;
