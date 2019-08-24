@@ -4062,9 +4062,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                     g.Blinking = true;
 
                 if (cursor_is_visible)
-                {
                     draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_Text));
-                }
             }
 
             // Notify OS of text input position for advanced IME (-1 x offset so that Windows IME can cover our cursor. Bit of an extra nicety.)

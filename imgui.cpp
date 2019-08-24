@@ -3654,11 +3654,7 @@ double ImGui::GetEventWaitingTimeout()
     float highest_frame_rate = g.IO.PowerSavingMinFrameRate;
 
     if (g.Blinking)
-    {
-        // 6fps to capture both the frequency and duty cycle of the default
-        // text input cursor.
-        highest_frame_rate = ImMax(6.0f, highest_frame_rate);
-    }
+        highest_frame_rate = ImMax(highest_frame_rate, 6.0f); // 6fps to capture both the frequency and duty cycle of the default text input cursor.
 
     for (int i = 0; i < g.UserFrameRateRequirements.GetSize(); i++)
         if (g.UserFrameRateRequirements.Data[i] > highest_frame_rate)
