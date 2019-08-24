@@ -3652,6 +3652,14 @@ double ImGui::GetEventWaitingTimeout()
         return 0.0;
 
     float highest_frame_rate = g.IO.PowerSavingMinFrameRate;
+
+    if (g.Blinking)
+    {
+        // 6fps to capture both the frequency and duty cycle of the default
+        // text input cursor.
+        highest_frame_rate = ImMax(6.0f, highest_frame_rate);
+    }
+
     for (int i = 0; i < g.FrameRateRequirements.GetSize(); i++)
         if (g.FrameRateRequirements.Data[i] > highest_frame_rate)
             highest_frame_rate = g.FrameRateRequirements.Data[i];
@@ -3711,6 +3719,7 @@ void ImGui::NewFrame()
     g.FrameCount += 1;
     g.TooltipOverrideCount = 0;
     g.WindowsActiveCount = 0;
+    g.Blinking = false;
 
     // Setup current font and draw list shared data
     g.IO.Fonts->Locked = true;
