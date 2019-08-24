@@ -917,7 +917,7 @@ struct ImGuiContext
     ImVector<ImGuiPopupData>BeginPopupStack;                    // Which level of BeginPopup() we are in (reset every frame)
 
     // Power saving mode
-    ImPool<float>           FrameRateRequirements;
+    ImPool<float>           UserFrameRateRequirements;
     bool                    Blinking;                           // if any widget is currently blinking (e.g. InputText).
 
     // Navigation data (for gamepad/keyboard)

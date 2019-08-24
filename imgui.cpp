@@ -3660,9 +3660,9 @@ double ImGui::GetEventWaitingTimeout()
         highest_frame_rate = ImMax(6.0f, highest_frame_rate);
     }
 
-    for (int i = 0; i < g.FrameRateRequirements.GetSize(); i++)
-        if (g.FrameRateRequirements.Data[i] > highest_frame_rate)
-            highest_frame_rate = g.FrameRateRequirements.Data[i];
+    for (int i = 0; i < g.UserFrameRateRequirements.GetSize(); i++)
+        if (g.UserFrameRateRequirements.Data[i] > highest_frame_rate)
+            highest_frame_rate = g.UserFrameRateRequirements.Data[i];
 
     double timeout = 1.0 / highest_frame_rate;
     timeout = ImMax(0.0, timeout);
@@ -3674,7 +3674,7 @@ void ImGui::SetFrameRateRequirement(ImGuiID id, float min_frame_rate)
 {
     ImGuiContext& g = *GImGui;
 
-    float* requirement = g.FrameRateRequirements.GetOrAddByKey(id);
+    float* requirement = g.UserFrameRateRequirements.GetOrAddByKey(id);
 
     *requirement = min_frame_rate;
 }
