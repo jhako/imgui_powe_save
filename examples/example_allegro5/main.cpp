@@ -65,20 +65,23 @@ int main(int, char**)
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         ALLEGRO_EVENT ev;
+        bool got_event = false;
+        bool got_timeout_event = false;
         const double waiting_time = ImGui::GetEventWaitingTime();
-        bool got_timeout = false;
-        if (isinf(waiting_time))
+        if (waiting_time > 0.0)
         {
-            al_wait_for_event(queue, &ev);
+            if (isinf(waiting_time))
+                al_wait_for_event(queue, NULL);
+            else
+                got_timeout_event = !al_wait_for_event_timed(queue, NULL, waiting_time);
+            got_event = true;
         }
-        else
+        if (!got_timeout_event)
         {
-            got_timeout = !al_wait_for_event_timed(queue, &ev, waiting_time);
-        }
-        if (!got_timeout)
-        {
-            do
+            while (al_get_next_event(queue, &ev))
             {
+                got_event = true;
+
                 ImGui_ImplAllegro5_ProcessEvent(&ev);
                 if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
                     running = false;
@@ -88,9 +91,9 @@ int main(int, char**)
                     al_acknowledge_resize(display);
                     ImGui_ImplAllegro5_CreateDeviceObjects();
                 }
-            }
-            while (al_get_next_event(queue, &ev));
+            };
         }
+        io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
         ImGui_ImplAllegro5_NewFrame();
@@ -120,6 +123,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("Frames since last event: %d", ImGui::GetIO().FramesSinceLastEvent);
             ImGui::End();
         }
 

@@ -121,25 +121,30 @@ int main(int, char**)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
         bool got_event = false;
-        bool got_timeout = false; // Note that we consider a timeout a form of event.
+        bool got_timeout_event = false;
         const double waiting_time = ImGui::GetEventWaitingTime();
         if (waiting_time > 0.0)
         {
-            const int waiting_time_ms = (int)(1000.0 * ImGui::GetEventWaitingTime());
-            got_timeout = (0 == SDL_WaitEventTimeout(NULL, waiting_time_ms));
+            if (isinf(waiting_time))
+                SDL_WaitEvent(NULL);
+            else
+            {
+                const int waiting_time_ms = (int)(1000.0 * ImGui::GetEventWaitingTime());
+                got_timeout_event = (SDL_WaitEventTimeout(NULL, waiting_time_ms) == 0);
+            }
             got_event = true;
         }
-        if (!got_timeout)
+        if (!got_timeout_event)
         {
             while (SDL_PollEvent(&event) == 1)
             {
+                got_event = true;
+
                 ImGui_ImplSDL2_ProcessEvent(&event);
                 if (event.type == SDL_QUIT)
                     done = true;
                 if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                     done = true;
-
-                got_event = true;
             };
         }
         io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;

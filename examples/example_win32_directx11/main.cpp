@@ -91,31 +91,26 @@ int main(int, char**)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         const double waiting_time = ImGui::GetEventWaitingTime();
         bool got_event = false;
-        bool got_timeout = false;
+        bool got_timeout_event = false;
         if (waiting_time > 0.0)
         {
             DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
-            got_event = got_timeout = (WAIT_TIMEOUT == ::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE));
+            got_timeout_event = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
+            got_event = true;
         }
-        if (!got_timeout)
+        if (!got_timeout_event)
         {
-            BOOL got_message;
-            do
+            while(::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
             {
-                got_message = ::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
-                if (got_message)
-                {
-                    if ((msg.message) == WM_QUIT)
-                        done = true;
+                got_event = true;
 
-                    got_event = true;
-                    ::TranslateMessage(&msg);
-                    ::DispatchMessage(&msg);
-                }
+                if ((msg.message) == WM_QUIT)
+                    done = true;
+
+                ::TranslateMessage(&msg);
+                ::DispatchMessage(&msg);
             }
-            while(got_message);
         }
-        if (!got_timeout)
         io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
