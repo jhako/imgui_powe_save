@@ -81,30 +81,42 @@ int main(int, char**)
     // Main loop
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));
-    while (msg.message != WM_QUIT)
+    bool done = false;
+    while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        double timeout = ImGui::GetEventWaitingTimeout();
-        if (timeout > 0.0)
+        const double waiting_time = ImGui::GetEventWaitingTime();
+        bool got_event = false;
+        bool got_timeout = false;
+        if (waiting_time > 0.0)
         {
-            DWORD timeout_ms = isinf(timeout) ? INFINITE : (DWORD)(1000.0 * timeout);
-            ::MsgWaitForMultipleObjects(0, NULL, FALSE, timeout_ms, QS_ALLEVENTS);
+            DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
+            got_event = got_timeout = (WAIT_TIMEOUT == ::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE));
         }
-        BOOL got_message;
-        do
+        if (!got_timeout)
         {
-            got_message = ::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
-            if (got_message)
+            BOOL got_message;
+            do
             {
-                ::TranslateMessage(&msg);
-                ::DispatchMessage(&msg);
+                got_message = ::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE);
+                if (got_message)
+                {
+                    if ((msg.message) == WM_QUIT)
+                        done = true;
+
+                    got_event = true;
+                    ::TranslateMessage(&msg);
+                    ::DispatchMessage(&msg);
+                }
             }
+            while(got_message);
         }
-        while(got_message);
+        if (!got_timeout)
+        io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
@@ -135,6 +147,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("Frames since last event: %d", ImGui::GetIO().FramesSinceLastEvent);
             ImGui::End();
         }
 

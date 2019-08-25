@@ -3643,18 +3643,23 @@ static void NewFrameSanityChecks()
         g.IO.ConfigWindowsResizeFromEdges = false;
 }
 
-double ImGui::GetEventWaitingTimeout()
+double ImGui::GetEventWaitingTime()
 {
     ImGuiContext& g = *GImGui;
 
-    return (g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) ? g.MaxTimeBeforeNextFrame : 0.0;
+    if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FramesSinceLastEvent >= 2)
+    {
+        return ImMax(0.0, g.MaxTimeBeforeNewFrame);
+    }
+
+    return 0.0;
 }
 
-void ImGui::SetNextFrameBefore(double time)
+void ImGui::SetMaxTimeBeforeNewFrame(double time)
 {
     ImGuiContext& g = *GImGui;
 
-    g.MaxTimeBeforeNextFrame = ImMin(g.MaxTimeBeforeNextFrame, time);
+    g.MaxTimeBeforeNewFrame = ImMin(g.MaxTimeBeforeNewFrame, time);
 }
 
 void ImGui::NewFrame()
@@ -3697,7 +3702,7 @@ void ImGui::NewFrame()
     g.FrameCount += 1;
     g.TooltipOverrideCount = 0;
     g.WindowsActiveCount = 0;
-    g.MaxTimeBeforeNextFrame = INFINITY;
+    g.MaxTimeBeforeNewFrame = INFINITY;
 
     // Setup current font and draw list shared data
     g.IO.Fonts->Locked = true;

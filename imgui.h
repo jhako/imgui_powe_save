@@ -225,10 +225,10 @@ namespace ImGui
 
     // Power saving mode
     // Disabled by default; enabled by setting ImGuiConfigFlags_EnablePowerSavingMode to true in ImGuiIO.ConfigFlags.
-    // When enabled, and if implemented by the platform binding (using the GetEventWaitingTimeout() method), the frame rate will be reduced by waiting for inputs (i.e. blocking/sleeping) rather than polling, for the duration returned by GetEventWaitingTimeout().
-    // If you need to increase the minimum frame rate, for example when playing animations, use SetNextFrameBefore() to request a maximum delay before the next frame.
-    IMGUI_API double        GetEventWaitingTimeout(); // in seconds; note that it can be zero (in which case you might want to poll) or infinity (in which case you will need to call a non-timeout event waiting function).
-    IMGUI_API void          SetNextFrameBefore(double time); // in seconds
+    // When enabled, and if implemented by the platform binding (using the GetEventWaitingTime() method), the frame rate will be reduced by waiting for events (i.e. blocking/sleeping) rather than polling, for the duration returned by GetEventWaitingTime().
+    // If you need to increase the minimum frame rate, for example when playing animations, use SetMaxTimeBeforeNewFrame() to request a maximum waiting time before starting the next frame.
+    IMGUI_API double        GetEventWaitingTime();                      // in seconds; note that it can be zero (in which case you might want to peek/poll) or infinity (in which case you may have to use a non-timeout event waiting method).
+    IMGUI_API void          SetMaxTimeBeforeNewFrame(double time);      // in seconds
 
     // Demo, Debug, Information
     IMGUI_API void          ShowDemoWindow(bool* p_open = NULL);        // create Demo window (previously called ShowTestWindow). demonstrate most ImGui features. call this to learn about the library! try to make it always available in your application!
@@ -1008,7 +1008,7 @@ enum ImGuiConfigFlags_
     ImGuiConfigFlags_NavNoCaptureKeyboard   = 1 << 3,   // Instruct navigation to not set the io.WantCaptureKeyboard flag when io.NavActive is set.
     ImGuiConfigFlags_NoMouse                = 1 << 4,   // Instruct imgui to clear mouse position/buttons in NewFrame(). This allows ignoring the mouse information set by the back-end.
     ImGuiConfigFlags_NoMouseCursorChange    = 1 << 5,   // Instruct back-end to not alter mouse cursor shape and visibility. Use if the back-end cursor changes are interfering with yours and you don't want to use SetMouseCursor() to change mouse cursor. You may want to honor requests from imgui by reading GetMouseCursor() yourself instead.
-    ImGuiConfigFlags_EnablePowerSavingMode  = 1 << 6,   // Instruct imgui to adjust the frame rate dynamically in order to reduce power consumption. Use SetNextFrameBefore() to let your application request a minimum frame rate.
+    ImGuiConfigFlags_EnablePowerSavingMode  = 1 << 6,   // Instruct imgui to adjust the frame rate dynamically in order to reduce power consumption. Use SetMaxTimeBeforeNewFrame() to let your application request a minimum frame rate.
 
     // User storage (to allow your back-end/engine to communicate to code that may be shared between multiple projects. Those flags are not used by core Dear ImGui)
     ImGuiConfigFlags_IsSRGB                 = 1 << 20,  // Application is SRGB-aware.
@@ -1461,6 +1461,7 @@ struct ImGuiIO
     float       NavInputsDownDuration[ImGuiNavInput_COUNT];
     float       NavInputsDownDurationPrev[ImGuiNavInput_COUNT];
     ImVector<ImWchar> InputQueueCharacters;     // Queue of _characters_ input (obtained by platform back-end). Fill using AddInputCharacter() helper.
+    int         FramesSinceLastEvent;           // How many frames since the last event (user input, event waiting timeout, etc.) A value of 0 indicates that the current frame was triggered by an event
 
     IMGUI_API   ImGuiIO();
 };

@@ -917,7 +917,7 @@ struct ImGuiContext
     ImVector<ImGuiPopupData>BeginPopupStack;                    // Which level of BeginPopup() we are in (reset every frame)
 
     // Power saving mode
-    double                  MaxTimeBeforeNextFrame;             // in seconds
+    double                  MaxTimeBeforeNewFrame;              // how much time in seconds can we wait for events before starting a new frame
 
     // Navigation data (for gamepad/keyboard)
     ImGuiWindow*            NavWindow;                          // Focused window for navigation. Could be called 'FocusWindow'

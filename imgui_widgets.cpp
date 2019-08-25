@@ -4059,7 +4059,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             if (cursor_screen_rect.Overlaps(clip_rect))
             {
                 if (g.IO.ConfigInputTextCursorBlink)
-                    SetNextFrameBefore(1.0 / 6.0); // 6fps to capture both the frequency and the duty cycle defined above.
+                    SetMaxTimeBeforeNewFrame(1.0 / 6.0); // 6fps to capture both the frequency and the duty cycle defined above.
 
                 if (cursor_is_visible)
                     draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_Text));
