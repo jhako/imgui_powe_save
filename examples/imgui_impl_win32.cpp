@@ -46,7 +46,6 @@ static INT64                g_TicksPerSecond = 0;
 static ImGuiMouseCursor     g_LastMouseCursor = ImGuiMouseCursor_COUNT;
 static bool                 g_HasGamepad = false;
 static bool                 g_WantUpdateHasGamepad = true;
-static bool                 g_GotEvent = false;
 
 // Functions
 bool    ImGui_ImplWin32_Init(void* hwnd)
@@ -216,8 +215,6 @@ void    ImGui_ImplWin32_NewFrame()
     io.DeltaTime = (float)(current_time - g_Time) / g_TicksPerSecond;
     g_Time = current_time;
 
-    io.FramesSinceLastEvent = g_GotEvent ? 0 : io.FramesSinceLastEvent + 1;
-
     // Read keyboard modifiers inputs
     io.KeyCtrl = (::GetKeyState(VK_CONTROL) & 0x8000) != 0;
     io.KeyShift = (::GetKeyState(VK_SHIFT) & 0x8000) != 0;
@@ -243,7 +240,6 @@ void    ImGui_ImplWin32_NewFrame()
 // Return true if the caller should poll for events.
 bool ImGui_ImplWin32_WaitForEvent()
 {
-    g_GotEvent = false;
     bool got_timeout_event = false;
 
     const double waiting_time = ImGui::GetEventWaitingTime();
@@ -252,7 +248,6 @@ bool ImGui_ImplWin32_WaitForEvent()
     {
         DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
         got_timeout_event = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
-        g_GotEvent = true;
     }
 
     return !got_timeout_event;
@@ -275,12 +270,13 @@ bool ImGui_ImplWin32_WaitForEvent()
 // PS: We treat DBLCLK messages as regular mouse down messages, so this code will work on windows classes that have the CS_DBLCLKS flag set. Our own example app code doesn't set this flag.
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    g_GotEvent = true;
-
     if (ImGui::GetCurrentContext() == NULL)
         return 0;
 
     ImGuiIO& io = ImGui::GetIO();
+
+    io.FrameCountSinceLastInput = 0;
+
     switch (msg)
     {
     case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK:

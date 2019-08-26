@@ -129,7 +129,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Text("Frames since last event: %d", ImGui::GetIO().FramesSinceLastEvent);
+            ImGui::Text("Frames since last input: %d", ImGui::GetIO().FrameCountSinceLastInput);
             ImGui::End();
         }
 

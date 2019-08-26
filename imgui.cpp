@@ -3647,7 +3647,7 @@ double ImGui::GetEventWaitingTime()
 {
     ImGuiContext& g = *GImGui;
 
-    if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FramesSinceLastEvent >= 2)
+    if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FrameCountSinceLastInput > 2)
     {
         return ImMax(0.0, g.MaxWaitBeforeNextFrame);
     }
@@ -4187,6 +4187,7 @@ void ImGui::EndFrame()
     // End frame
     g.FrameScopeActive = false;
     g.FrameCountEnded = g.FrameCount;
+    g.IO.FrameCountSinceLastInput++;
 
     // Initiate moving window + handle left-click and right-click focus
     UpdateMouseMovingWindowEndFrame();

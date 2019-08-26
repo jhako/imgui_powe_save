@@ -334,7 +334,7 @@ void ImGui_ImplGlfw_NewFrame()
     g_Time = current_time;
 
     // Power saving mode
-    io.FramesSinceLastEvent = (g_GotEvent || (ImGui::GetEventWaitingTime() > 0.0)) ? 0 : io.FramesSinceLastEvent + 1;
+    io.FrameCountSinceLastInput = (g_GotEvent || (ImGui::GetEventWaitingTime() > 0.0)) ? 0 : io.FrameCountSinceLastInput + 1;
     g_GotEvent = false;
 
     ImGui_ImplGlfw_UpdateMousePosAndButtons();

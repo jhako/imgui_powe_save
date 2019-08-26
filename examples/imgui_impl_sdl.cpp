@@ -369,7 +369,7 @@ void ImGui_ImplSDL2_NewFrame(SDL_Window* window)
     io.DeltaTime = g_Time > 0 ? (float)((double)(current_time - g_Time) / frequency) : (float)(1.0f / 60.0f);
     g_Time = current_time;
 
-    io.FramesSinceLastEvent = g_GotEvent ? 0 : io.FramesSinceLastEvent + 1;
+    io.FrameCountSinceLastInput = g_GotEvent ? 0 : io.FrameCountSinceLastInput + 1;
 
     ImGui_ImplSDL2_UpdateMousePosAndButtons();
     ImGui_ImplSDL2_UpdateMouseCursor();

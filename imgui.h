@@ -1461,7 +1461,7 @@ struct ImGuiIO
     float       NavInputsDownDuration[ImGuiNavInput_COUNT];
     float       NavInputsDownDurationPrev[ImGuiNavInput_COUNT];
     ImVector<ImWchar> InputQueueCharacters;     // Queue of _characters_ input (obtained by platform back-end). Fill using AddInputCharacter() helper.
-    int         FramesSinceLastEvent;           // How many frames since the last event (user input, event waiting timeout, etc.) A value of 0 indicates that the current frame was triggered by an event
+    int         FrameCountSinceLastInput;       // How many frames since the last input event; a value of 0 indicates that the current frame was triggered by an input.
 
     IMGUI_API   ImGuiIO();
 };
