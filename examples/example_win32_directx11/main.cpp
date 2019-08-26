@@ -80,7 +80,8 @@ int main(int, char**)
     // Main loop
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));
-    while (msg.message != WM_QUIT)
+    bool done = false;
+    while (!done)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -92,7 +93,7 @@ int main(int, char**)
             while(::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
             {
                 if (msg.message == WM_QUIT)
-                    continue;
+                    done = true;
 
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
