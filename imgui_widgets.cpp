@@ -4069,6 +4069,9 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                     else
                         time_to_transition = 1.20f - ImFmod(state->CursorAnim, 1.20f);
 
+                    // Make sure the next frame starts after the transition.
+                    time_to_transition += 0.05f;
+
                     SetMaxWaitBeforeNextFrame(time_to_transition);
                 }
 
