@@ -3655,7 +3655,7 @@ double ImGui::GetEventWaitingTime()
     return 0.0;
 }
 
-void ImGui::SetMaxTimeBeforeNewFrame(double time)
+void ImGui::SetMaxWaitBeforeNextFrame(double time)
 {
     ImGuiContext& g = *GImGui;
 

@@ -1050,7 +1050,7 @@ static void ShowDemoWindowWidgets()
         static bool animate = true;
         ImGui::Checkbox("Animate", &animate);
         if (animate)
-            ImGui::SetMaxTimeBeforeNewFrame(1.0 / 30.0);
+            ImGui::SetMaxWaitBeforeNextFrame(1.0 / 30.0);
 
         static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
         ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
