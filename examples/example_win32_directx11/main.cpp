@@ -81,37 +81,24 @@ int main(int, char**)
     // Main loop
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));
-    bool done = false;
-    while (!done)
+    while (msg.message != WM_QUIT)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        const double waiting_time = ImGui::GetEventWaitingTime();
-        bool got_event = false;
-        bool got_timeout_event = false;
-        if (waiting_time > 0.0)
-        {
-            DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
-            got_timeout_event = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
-            got_event = true;
-        }
-        if (!got_timeout_event)
+        if (ImGui_ImplWin32_WaitForEvent())
         {
             while(::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
             {
-                got_event = true;
-
-                if ((msg.message) == WM_QUIT)
-                    done = true;
+                if (msg.message == WM_QUIT)
+                    continue;
 
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
             }
         }
-        io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
