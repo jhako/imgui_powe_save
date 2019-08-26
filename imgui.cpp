@@ -3649,7 +3649,7 @@ double ImGui::GetEventWaitingTime()
 
     if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FramesSinceLastEvent >= 2)
     {
-        return ImMax(0.0, g.MaxTimeBeforeNewFrame);
+        return ImMax(0.0, g.MaxWaitBeforeNextFrame);
     }
 
     return 0.0;
@@ -3659,7 +3659,7 @@ void ImGui::SetMaxWaitBeforeNextFrame(double time)
 {
     ImGuiContext& g = *GImGui;
 
-    g.MaxTimeBeforeNewFrame = ImMin(g.MaxTimeBeforeNewFrame, time);
+    g.MaxWaitBeforeNextFrame = ImMin(g.MaxWaitBeforeNextFrame, time);
 }
 
 void ImGui::NewFrame()
@@ -3702,7 +3702,7 @@ void ImGui::NewFrame()
     g.FrameCount += 1;
     g.TooltipOverrideCount = 0;
     g.WindowsActiveCount = 0;
-    g.MaxTimeBeforeNewFrame = INFINITY;
+    g.MaxWaitBeforeNextFrame = INFINITY;
 
     // Setup current font and draw list shared data
     g.IO.Fonts->Locked = true;
