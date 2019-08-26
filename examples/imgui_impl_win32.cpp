@@ -14,6 +14,7 @@
 #endif
 #include <windows.h>
 #include <XInput.h>
+#include <math.h> // isinf
 #include <tchar.h>
 
 // CHANGELOG
