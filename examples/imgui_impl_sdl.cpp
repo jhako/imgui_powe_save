@@ -50,6 +50,8 @@
 #include "TargetConditionals.h"
 #endif
 
+#include <math.h> // isinf
+
 #define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE    SDL_VERSION_ATLEAST(2,0,4)
 #define SDL_HAS_VULKAN                      SDL_VERSION_ATLEAST(2,0,6)
 
@@ -59,6 +61,7 @@ static Uint64       g_Time = 0;
 static bool         g_MousePressed[3] = { false, false, false };
 static SDL_Cursor*  g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
 static char*        g_ClipboardTextData = NULL;
+static bool         g_GotEvent = false;
 
 static const char* ImGui_ImplSDL2_GetClipboardText(void*)
 {
@@ -73,6 +76,33 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
     SDL_SetClipboardText(text);
 }
 
+// Return true if the caller should poll for events.
+bool ImGui_ImplSDL2_WaitForEvent()
+{
+    g_GotEvent = false;
+    bool got_timeout_event = false;
+
+    const double waiting_time = ImGui::GetEventWaitingTime();
+
+    if (waiting_time > 0.0)
+    {
+        if (isinf(waiting_time))
+        {
+            SDL_WaitEvent(NULL);
+        }
+        else
+        {
+            const int waiting_time_ms = (int)(1000.0 * ImGui::GetEventWaitingTime());
+
+            got_timeout_event = SDL_WaitEventTimeout(NULL, waiting_time_ms) == 0;
+        }
+
+        g_GotEvent = true;
+    }
+
+    return !got_timeout_event;
+}
+
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
 // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
@@ -80,6 +110,8 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 // If you have multiple SDL events and some of them are not meant to be used by dear imgui, you may need to filter events based on their windowID field.
 bool ImGui_ImplSDL2_ProcessEvent(const SDL_Event* event)
 {
+    g_GotEvent = true;
+
     ImGuiIO& io = ImGui::GetIO();
     switch (event->type)
     {
@@ -336,6 +368,8 @@ void ImGui_ImplSDL2_NewFrame(SDL_Window* window)
     Uint64 current_time = SDL_GetPerformanceCounter();
     io.DeltaTime = g_Time > 0 ? (float)((double)(current_time - g_Time) / frequency) : (float)(1.0f / 60.0f);
     g_Time = current_time;
+
+    io.FramesSinceLastEvent = g_GotEvent ? 0 : io.FramesSinceLastEvent + 1;
 
     ImGui_ImplSDL2_UpdateMousePosAndButtons();
     ImGui_ImplSDL2_UpdateMouseCursor();
