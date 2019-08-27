@@ -224,7 +224,8 @@ void ImGui_ImplGlfw_Shutdown()
 
 void ImGui_ImplGlfw_WaitForEvent()
 {
-    const double waiting_time = ImGui::GetEventWaitingTime();
+    bool window_is_hidden = !glfwGetWindowAttrib(g_Window, GLFW_VISIBLE) || glfwGetWindowAttrib(g_Window, GLFW_ICONIFIED);
+    double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))

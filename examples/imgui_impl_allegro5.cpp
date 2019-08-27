@@ -320,7 +320,9 @@ void ImGui_ImplAllegro5_Shutdown()
 
 void ImGui_ImplAllegro5_WaitForEvent(ALLEGRO_EVENT_QUEUE* queue)
 {
-    const double waiting_time = ImGui::GetEventWaitingTime();
+    int display_flags = al_get_display_flags(g_Display);
+    bool window_is_hidden = display_flags & ALLEGRO_MINIMIZED;
+    double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))

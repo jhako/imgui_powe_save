@@ -77,7 +77,9 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 
 void ImGui_ImplSDL2_WaitForEvent()
 {
-    const double waiting_time = ImGui::GetEventWaitingTime();
+    Uint32 window_flags = SDL_GetWindowFlags(g_Window);
+    bool window_is_hidden = window_flags & (SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED);
+    double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))
