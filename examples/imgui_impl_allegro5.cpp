@@ -318,22 +318,16 @@ void ImGui_ImplAllegro5_Shutdown()
     g_ClipboardTextData = NULL;
 }
 
-// Return true if the caller should poll for events.
-bool ImGui_ImplAllegro5_WaitForEvent(ALLEGRO_EVENT_QUEUE* queue)
+void ImGui_ImplAllegro5_WaitForEvent(ALLEGRO_EVENT_QUEUE* queue)
 {
     const double waiting_time = ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))
-        {
             al_wait_for_event(queue, NULL);
-            return true;
-        }
         else
-            return al_wait_for_event_timed(queue, NULL, waiting_time);
+            al_wait_for_event_timed(queue, NULL, waiting_time);
     }
-
-    return true;
 }
 
 

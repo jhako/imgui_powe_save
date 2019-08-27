@@ -237,17 +237,14 @@ void    ImGui_ImplWin32_NewFrame()
     ImGui_ImplWin32_UpdateGamepads();
 }
 
-// Return true if the caller should poll for events.
-bool ImGui_ImplWin32_WaitForEvent()
+void ImGui_ImplWin32_WaitForEvent()
 {
     const double waiting_time = ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
     {
         DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
-        return ::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) != WAIT_TIMEOUT;
+        ::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE);
     }
-
-    return true;
 }
 
 // Allow compilation with old Windows SDK. MinGW doesn't have default _WIN32_WINNT/WINVER versions.

@@ -222,8 +222,7 @@ void ImGui_ImplGlfw_Shutdown()
     g_ClientApi = GlfwClientApi_Unknown;
 }
 
-// Return true if the caller should poll for events.
-bool ImGui_ImplGlfw_WaitForEvent()
+void ImGui_ImplGlfw_WaitForEvent()
 {
     const double waiting_time = ImGui::GetEventWaitingTime();
     if (waiting_time > 0.0)
@@ -232,11 +231,7 @@ bool ImGui_ImplGlfw_WaitForEvent()
             glfwWaitEvents();
         else
             glfwWaitEventsTimeout(waiting_time);
-
-        return false;
     }
-
-    return true;
 }
 
 static void ImGui_ImplGlfw_UpdateMousePosAndButtons()
