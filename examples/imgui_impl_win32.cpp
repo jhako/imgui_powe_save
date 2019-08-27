@@ -240,17 +240,17 @@ void    ImGui_ImplWin32_NewFrame()
 // Return true if the caller should poll for events.
 bool ImGui_ImplWin32_WaitForEvent()
 {
-    bool got_timeout_event = false;
+    bool got_timeout = false;
 
     const double waiting_time = ImGui::GetEventWaitingTime();
 
     if (waiting_time > 0.0)
     {
         DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
-        got_timeout_event = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
+        got_timeout = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
     }
 
-    return !got_timeout_event;
+    return !got_timeout;
 }
 
 // Allow compilation with old Windows SDK. MinGW doesn't have default _WIN32_WINNT/WINVER versions.
