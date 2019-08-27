@@ -5,7 +5,6 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <math.h> // isinf
 #include <stdio.h>
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
@@ -126,15 +125,7 @@ int main(int, char**)
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        const double waiting_time = ImGui::GetEventWaitingTime();
-        if (waiting_time > 0.0)
-        {
-            if (isinf(waiting_time))
-                glfwWaitEvents();
-            else
-                glfwWaitEventsTimeout(waiting_time);
-        }
-        else
+        if (ImGui_ImplGlfw_WaitForEvent())
         {
             glfwPollEvents();
         }
