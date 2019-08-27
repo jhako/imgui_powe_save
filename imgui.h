@@ -228,7 +228,7 @@ namespace ImGui
     // When enabled, and if implemented by the platform binding (using the GetEventWaitingTime() method), the frame rate will be reduced by waiting for events (i.e. blocking/sleeping) rather than polling, for the duration returned by GetEventWaitingTime().
     // If you need to increase the minimum frame rate, for example when playing animations, use SetMaxWaitBeforeNextFrame() to request a maximum waiting time before starting the next frame.
     IMGUI_API double        GetEventWaitingTime();                      // in seconds; note that it can be zero (in which case you might want to peek/poll) or infinity (in which case you may have to use a non-timeout event waiting method).
-    IMGUI_API void          SetMaxWaitBeforeNextFrame(double time);      // in seconds
+    IMGUI_API void          SetMaxWaitBeforeNextFrame(double time);     // in seconds
 
     // Demo, Debug, Information
     IMGUI_API void          ShowDemoWindow(bool* p_open = NULL);        // create Demo window (previously called ShowTestWindow). demonstrate most ImGui features. call this to learn about the library! try to make it always available in your application!

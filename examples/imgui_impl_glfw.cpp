@@ -232,6 +232,7 @@ bool ImGui_ImplGlfw_WaitForEvent()
             glfwWaitEvents();
         else
             glfwWaitEventsTimeout(waiting_time);
+
         return false;
     }
 

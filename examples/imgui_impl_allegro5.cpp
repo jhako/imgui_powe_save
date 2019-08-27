@@ -321,19 +321,19 @@ void ImGui_ImplAllegro5_Shutdown()
 // Return true if the caller should poll for events.
 bool ImGui_ImplAllegro5_WaitForEvent(ALLEGRO_EVENT_QUEUE* queue)
 {
-    bool got_timeout = false;
-
     const double waiting_time = ImGui::GetEventWaitingTime();
-
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))
-          al_wait_for_event(queue, NULL);
+        {
+            al_wait_for_event(queue, NULL);
+            return true;
+        }
         else
-          got_timeout = !al_wait_for_event_timed(queue, NULL, waiting_time);
+            return al_wait_for_event_timed(queue, NULL, waiting_time);
     }
 
-    return !got_timeout;
+    return true;
 }
 
 

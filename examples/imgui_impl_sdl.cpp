@@ -78,10 +78,7 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 // Return true if the caller should poll for events.
 bool ImGui_ImplSDL2_WaitForEvent()
 {
-    bool got_timeout = false;
-
     const double waiting_time = ImGui::GetEventWaitingTime();
-
     if (waiting_time > 0.0)
     {
         if (isinf(waiting_time))
@@ -92,11 +89,11 @@ bool ImGui_ImplSDL2_WaitForEvent()
         {
             const int waiting_time_ms = (int)(1000.0 * ImGui::GetEventWaitingTime());
 
-            got_timeout = SDL_WaitEventTimeout(NULL, waiting_time_ms) == 0;
+            return SDL_WaitEventTimeout(NULL, waiting_time_ms) == 1;
         }
     }
 
-    return !got_timeout;
+    return true;
 }
 
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.

@@ -92,11 +92,11 @@ int main(int, char**)
         {
             while(::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
             {
-                if (msg.message == WM_QUIT)
-                    done = true;
-
                 ::TranslateMessage(&msg);
                 ::DispatchMessage(&msg);
+
+                if (msg.message == WM_QUIT)
+                    done = true;
             }
         }
 

@@ -77,7 +77,7 @@ int main(int, char**)
                     al_acknowledge_resize(display);
                     ImGui_ImplAllegro5_CreateDeviceObjects();
                 }
-            };
+            }
         }
 
         // Start the Dear ImGui frame
