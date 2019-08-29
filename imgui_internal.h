@@ -528,6 +528,14 @@ struct ImVec1
     ImVec1(float _x) { x = _x; }
 };
 
+// 2D vector (half-size integer)
+struct ImVec2ih
+{
+    short   x, y;
+    ImVec2ih()                   { x = y = 0; }
+    ImVec2ih(short _x, short _y) { x = _x; y = _y; }
+};
+
 // 2D axis aligned bounding-box
 // NB: we can't rely on ImVec2 math operators being available here
 struct IMGUI_API ImRect
@@ -655,11 +663,11 @@ struct ImGuiWindowSettings
 {
     char*       Name;
     ImGuiID     ID;
-    ImVec2      Pos;
-    ImVec2      Size;
+    ImVec2ih    Pos;
+    ImVec2ih    Size;
     bool        Collapsed;
 
-    ImGuiWindowSettings() { Name = NULL; ID = 0; Pos = Size = ImVec2(0,0); Collapsed = false; }
+    ImGuiWindowSettings() { Name = NULL; ID = 0; Pos = Size = ImVec2ih(0, 0); Collapsed = false; }
 };
 
 struct ImGuiSettingsHandler
@@ -1316,8 +1324,8 @@ struct IMGUI_API ImGuiWindow
     ImVec2                  SetWindowPosVal;                    // store window position when using a non-zero Pivot (position set needs to be processed when we know the window size)
     ImVec2                  SetWindowPosPivot;                  // store window pivot for positioning. ImVec2(0,0) when positioning from top-left corner; ImVec2(0.5f,0.5f) for centering; ImVec2(1,1) for bottom right.
 
+    ImVector<ImGuiID>       IDStack;                            // ID stack. ID are hashes seeded with the value at the top of the stack. (In theory this should be in the TempData structure)
     ImGuiWindowTempData     DC;                                 // Temporary per-window data, reset at the beginning of the frame. This used to be called ImGuiDrawContext, hence the "DC" variable name.
-    ImVector<ImGuiID>       IDStack;                            // ID stack. ID are hashes seeded with the value at the top of the stack
 
     // The best way to understand what those rectangles are is to use the 'Metrics -> Tools -> Show windows rectangles' viewer.
     // The main 'OuterRect', omitted as a field, is window->Rect().
@@ -1329,6 +1337,7 @@ struct IMGUI_API ImGuiWindow
     ImRect                  ContentsRegionRect;                 // FIXME: This is currently confusing/misleading. It is essentially WorkRect but not handling of scrolling. We currently rely on it as right/bottom aligned sizing operation need some size to rely on.
 
     int                     LastFrameActive;                    // Last frame number the window was Active.
+    float                   LastTimeActive;
     float                   ItemWidthDefault;
     ImGuiMenuColumns        MenuColumns;                        // Simplified columns storage for menu items
     ImGuiStorage            StateStorage;
@@ -1346,6 +1355,10 @@ struct IMGUI_API ImGuiWindow
     ImGuiWindow*            NavLastChildNavWindow;              // When going to the menu bar, we remember the child window we came from. (This could probably be made implicit if we kept g.Windows sorted by last focused including child window.)
     ImGuiID                 NavLastIds[ImGuiNavLayer_COUNT];    // Last known NavId for this window, per layer (0/1)
     ImRect                  NavRectRel[ImGuiNavLayer_COUNT];    // Reference rectangle, in window relative space
+
+    bool                    MemoryCompacted;
+    int                     MemoryDrawListIdxCapacity;
+    int                     MemoryDrawListVtxCapacity;
 
 public:
     ImGuiWindow(ImGuiContext* context, const char* name);
@@ -1478,6 +1491,8 @@ namespace ImGui
     IMGUI_API void          SetWindowPos(ImGuiWindow* window, const ImVec2& pos, ImGuiCond cond = 0);
     IMGUI_API void          SetWindowSize(ImGuiWindow* window, const ImVec2& size, ImGuiCond cond = 0);
     IMGUI_API void          SetWindowCollapsed(ImGuiWindow* window, bool collapsed, ImGuiCond cond = 0);
+    IMGUI_API void          GcCompactTransientWindowBuffers(ImGuiWindow* window);
+    IMGUI_API void          GcAwakeTransientWindowBuffers(ImGuiWindow* window);
 
     IMGUI_API void          SetCurrentFont(ImFont* font);
     inline ImFont*          GetDefaultFont() { ImGuiContext& g = *GImGui; return g.IO.FontDefault ? g.IO.FontDefault : g.IO.Fonts->Fonts[0]; }

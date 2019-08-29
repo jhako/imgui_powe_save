@@ -1370,14 +1370,28 @@ void ImGui::ShrinkWidths(ImGuiShrinkWidthItem* items, int count, float width_exc
     int count_same_width = 1;
     while (width_excess > 0.0f && count_same_width < count)
     {
-        while (count_same_width < count && items[0].Width == items[count_same_width].Width)
+        while (count_same_width < count && items[0].Width <= items[count_same_width].Width)
             count_same_width++;
-        float width_to_remove_per_item_max = (count_same_width < count) ? (items[0].Width - items[count_same_width].Width) : (items[0].Width - 1.0f);
-        float width_to_remove_per_item = ImMin(width_excess / count_same_width, width_to_remove_per_item_max);
+        float max_width_to_remove_per_item = (count_same_width < count) ? (items[0].Width - items[count_same_width].Width) : (items[0].Width - 1.0f);
+        float width_to_remove_per_item = ImMin(width_excess / count_same_width, max_width_to_remove_per_item);
         for (int item_n = 0; item_n < count_same_width; item_n++)
             items[item_n].Width -= width_to_remove_per_item;
         width_excess -= width_to_remove_per_item * count_same_width;
     }
+
+    // Round width and redistribute remainder left-to-right (could make it an option of the function?)
+    // Ensure that e.g. the right-most tab of a shrunk tab-bar always reaches exactly at the same distance from the right-most edge of the tab bar separator.
+    width_excess = 0.0f;
+    for (int n = 0; n < count; n++)
+    {
+        float width_rounded = ImFloor(items[n].Width);
+        width_excess += items[n].Width - width_rounded;
+        items[n].Width = width_rounded;
+    }
+    if (width_excess > 0.0f)
+        for (int n = 0; n < count; n++)
+            if (items[n].Index < (int)(width_excess + 0.01f))
+                items[n].Width += 1.0f;
 }
 
 //-------------------------------------------------------------------------
@@ -2464,13 +2478,13 @@ bool ImGui::SliderBehavior(const ImRect& bb, ImGuiID id, ImGuiDataType data_type
         IM_ASSERT(*(const ImS32*)v_min >= IM_S32_MIN/2 && *(const ImS32*)v_max <= IM_S32_MAX/2);
         return SliderBehaviorT<ImS32, ImS32, float >(bb, id, data_type, (ImS32*)v,  *(const ImS32*)v_min,  *(const ImS32*)v_max,  format, power, flags, out_grab_bb);
     case ImGuiDataType_U32:
-        IM_ASSERT(*(const ImU32*)v_min <= IM_U32_MAX/2);
+        IM_ASSERT(*(const ImU32*)v_max <= IM_U32_MAX/2);
         return SliderBehaviorT<ImU32, ImS32, float >(bb, id, data_type, (ImU32*)v,  *(const ImU32*)v_min,  *(const ImU32*)v_max,  format, power, flags, out_grab_bb);
     case ImGuiDataType_S64:
         IM_ASSERT(*(const ImS64*)v_min >= IM_S64_MIN/2 && *(const ImS64*)v_max <= IM_S64_MAX/2);
         return SliderBehaviorT<ImS64, ImS64, double>(bb, id, data_type, (ImS64*)v,  *(const ImS64*)v_min,  *(const ImS64*)v_max,  format, power, flags, out_grab_bb);
     case ImGuiDataType_U64:
-        IM_ASSERT(*(const ImU64*)v_min <= IM_U64_MAX/2);
+        IM_ASSERT(*(const ImU64*)v_max <= IM_U64_MAX/2);
         return SliderBehaviorT<ImU64, ImS64, double>(bb, id, data_type, (ImU64*)v,  *(const ImU64*)v_min,  *(const ImU64*)v_max,  format, power, flags, out_grab_bb);
     case ImGuiDataType_Float:
         IM_ASSERT(*(const float*)v_min >= -FLT_MAX/2.0f && *(const float*)v_max <= FLT_MAX/2.0f);
@@ -3384,7 +3398,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         BeginGroup();
     const ImGuiID id = window->GetID(label);
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
-    ImVec2 size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? GetTextLineHeight() * 8.0f : label_size.y) + style.FramePadding.y*2.0f); // Arbitrary default of 8 lines high for multi-line
+    ImVec2 size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y*2.0f); // Arbitrary default of 8 lines high for multi-line
     const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + size);
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? (style.ItemInnerSpacing.x + label_size.x) : 0.0f, 0.0f));
 
