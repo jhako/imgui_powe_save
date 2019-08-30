@@ -320,6 +320,9 @@ void ImGui_ImplAllegro5_Shutdown()
 
 void ImGui_ImplAllegro5_WaitForEvent(ALLEGRO_EVENT_QUEUE* queue)
 {
+    if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode))
+        return;
+
     int display_flags = al_get_display_flags(g_Display);
     bool window_is_hidden = display_flags & ALLEGRO_MINIMIZED;
     double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();

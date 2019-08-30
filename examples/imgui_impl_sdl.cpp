@@ -77,6 +77,9 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 
 void ImGui_ImplSDL2_WaitForEvent()
 {
+    if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode))
+        return;
+
     Uint32 window_flags = SDL_GetWindowFlags(g_Window);
     bool window_is_hidden = window_flags & (SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED);
     double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();
