@@ -3682,19 +3682,17 @@ double ImGui::GetEventWaitingTime()
 {
     ImGuiContext& g = *GImGui;
 
-    if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FramesSinceLastEvent >= 2)
-    {
-        return ImMax(0.0, g.MaxTimeBeforeNewFrame);
-    }
+    if ((g.IO.ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode) && g.IO.FrameCountSinceLastInput > 2)
+        return ImMax(0.0, g.MaxWaitBeforeNextFrame);
 
     return 0.0;
 }
 
-void ImGui::SetMaxTimeBeforeNewFrame(double time)
+void ImGui::SetMaxWaitBeforeNextFrame(double time)
 {
     ImGuiContext& g = *GImGui;
 
-    g.MaxTimeBeforeNewFrame = ImMin(g.MaxTimeBeforeNewFrame, time);
+    g.MaxWaitBeforeNextFrame = ImMin(g.MaxWaitBeforeNextFrame, time);
 }
 
 void ImGui::NewFrame()
@@ -3737,7 +3735,7 @@ void ImGui::NewFrame()
     g.FrameCount += 1;
     g.TooltipOverrideCount = 0;
     g.WindowsActiveCount = 0;
-    g.MaxTimeBeforeNewFrame = INFINITY;
+    g.MaxWaitBeforeNextFrame = INFINITY;
 
     // Setup current font and draw list shared data
     g.IO.Fonts->Locked = true;
@@ -4227,6 +4225,7 @@ void ImGui::EndFrame()
     // End frame
     g.FrameScopeActive = false;
     g.FrameCountEnded = g.FrameCount;
+    g.IO.FrameCountSinceLastInput++;
 
     // Initiate moving window + handle left-click and right-click focus
     UpdateMouseMovingWindowEndFrame();

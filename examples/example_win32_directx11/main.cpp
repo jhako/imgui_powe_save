@@ -7,7 +7,6 @@
 #include <d3d11.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include <math.h> // isinf
 #include <tchar.h>
 
 // Data
@@ -89,29 +88,15 @@ int main(int, char**)
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        const double waiting_time = ImGui::GetEventWaitingTime();
-        bool got_event = false;
-        bool got_timeout_event = false;
-        if (waiting_time > 0.0)
+        ImGui_ImplWin32_WaitForEvent();
+        while (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
         {
-            DWORD waiting_time_ms = isinf(waiting_time) ? INFINITE : (DWORD)(1000.0 * waiting_time);
-            got_timeout_event = (::MsgWaitForMultipleObjectsEx(0, NULL, waiting_time_ms, QS_ALLINPUT, MWMO_INPUTAVAILABLE|MWMO_ALERTABLE) == WAIT_TIMEOUT);
-            got_event = true;
-        }
-        if (!got_timeout_event)
-        {
-            while(::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
-            {
-                got_event = true;
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
 
-                if ((msg.message) == WM_QUIT)
-                    done = true;
-
-                ::TranslateMessage(&msg);
-                ::DispatchMessage(&msg);
-            }
+            if (msg.message == WM_QUIT)
+                done = true;
         }
-        io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
@@ -142,7 +127,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Text("Frames since last event: %d", ImGui::GetIO().FramesSinceLastEvent);
+            ImGui::Text("Frames since last input: %d", ImGui::GetIO().FrameCountSinceLastInput);
             ImGui::End();
         }
 

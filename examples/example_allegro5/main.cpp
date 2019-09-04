@@ -1,7 +1,6 @@
 // dear imgui: standalone example application for Allegro 5
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
-#include <math.h> // isinf
 #include <stdint.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -64,36 +63,20 @@ int main(int, char**)
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        ImGui_ImplAllegro5_WaitForEvent(queue);
         ALLEGRO_EVENT ev;
-        bool got_event = false;
-        bool got_timeout_event = false;
-        const double waiting_time = ImGui::GetEventWaitingTime();
-        if (waiting_time > 0.0)
+        while (al_get_next_event(queue, &ev))
         {
-            if (isinf(waiting_time))
-                al_wait_for_event(queue, NULL);
-            else
-                got_timeout_event = !al_wait_for_event_timed(queue, NULL, waiting_time);
-            got_event = true;
-        }
-        if (!got_timeout_event)
-        {
-            while (al_get_next_event(queue, &ev))
+            ImGui_ImplAllegro5_ProcessEvent(&ev);
+            if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+                running = false;
+            if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
             {
-                got_event = true;
-
-                ImGui_ImplAllegro5_ProcessEvent(&ev);
-                if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-                    running = false;
-                if (ev.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-                {
-                    ImGui_ImplAllegro5_InvalidateDeviceObjects();
-                    al_acknowledge_resize(display);
-                    ImGui_ImplAllegro5_CreateDeviceObjects();
-                }
-            };
+                ImGui_ImplAllegro5_InvalidateDeviceObjects();
+                al_acknowledge_resize(display);
+                ImGui_ImplAllegro5_CreateDeviceObjects();
+            }
         }
-        io.FramesSinceLastEvent = got_event ? 0 : io.FramesSinceLastEvent + 1;
 
         // Start the Dear ImGui frame
         ImGui_ImplAllegro5_NewFrame();
@@ -123,7 +106,7 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::Text("Frames since last event: %d", ImGui::GetIO().FramesSinceLastEvent);
+            ImGui::Text("Frames since last input: %d", ImGui::GetIO().FrameCountSinceLastInput);
             ImGui::End();
         }
 
