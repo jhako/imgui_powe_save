@@ -484,6 +484,9 @@ void ImGui::ShowDemoWindow(bool *p_open)
                 if (ImGui::IsKeyPressed(ImGuiKey_Space))
                     io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
             }
+            ImGui::CheckboxFlags("io.ConfigFlags: EnablePowerSavingMode", (unsigned int *)&io.ConfigFlags, ImGuiConfigFlags_EnablePowerSavingMode);
+            ImGui::SameLine();
+            HelpMarker("Enable power saving mode, reducing the frame rate automatically when idle.");
             ImGui::CheckboxFlags("io.ConfigFlags: NoMouseCursorChange", &io.ConfigFlags, ImGuiConfigFlags_NoMouseCursorChange);
             ImGui::SameLine();
             HelpMarker("Instruct backend to not alter mouse cursor shape and visibility.");
@@ -1756,8 +1759,22 @@ static void ShowDemoWindowWidgets()
     IMGUI_DEMO_MARKER("Widgets/Tabs");
     if (ImGui::TreeNode("Tabs"))
     {
-        IMGUI_DEMO_MARKER("Widgets/Tabs/Basic");
-        if (ImGui::TreeNode("Basic"))
+        static bool animate = true;
+        ImGui::Checkbox("Animate", &animate);
+        if (animate)
+            ImGui::SetMaxWaitBeforeNextFrame(1.0 / 30.0); // = 30fps
+
+        static float arr[] = {0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f};
+        ImGui::PlotLines("Frame Times", arr, IM_ARRAYSIZE(arr));
+
+        // Create a dummy array of contiguous float values to plot
+        // Tip: If your float aren't contiguous but part of a structure, you can pass a pointer to your first float and the sizeof() of your structure in the Stride parameter.
+        static float values[90] = {};
+        static int values_offset = 0;
+        static double refresh_time = 0.0;
+        if (!animate || refresh_time == 0.0)
+            refresh_time = ImGui::GetTime();
+        while (refresh_time < ImGui::GetTime()) // Create dummy data at fixed 60 hz rate for the demo
         {
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
             if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))

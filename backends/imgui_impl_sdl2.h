@@ -16,25 +16,30 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #pragma once
-#include "imgui.h"      // IMGUI_IMPL_API
+#include "imgui.h" // IMGUI_IMPL_API
 #ifndef IMGUI_DISABLE
 
 struct SDL_Window;
 struct SDL_Renderer;
 typedef union SDL_Event SDL_Event;
 
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForOpenGL(SDL_Window* window, void* sdl_gl_context);
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForVulkan(SDL_Window* window);
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForD3D(SDL_Window* window);
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForMetal(SDL_Window* window);
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForSDLRenderer(SDL_Window* window, SDL_Renderer* renderer);
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_InitForOther(SDL_Window* window);
-IMGUI_IMPL_API void     ImGui_ImplSDL2_Shutdown();
-IMGUI_IMPL_API void     ImGui_ImplSDL2_NewFrame();
-IMGUI_IMPL_API bool     ImGui_ImplSDL2_ProcessEvent(const SDL_Event* event);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForOpenGL(SDL_Window *window, void *sdl_gl_context);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForVulkan(SDL_Window *window);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForD3D(SDL_Window *window);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForMetal(SDL_Window *window);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForSDLRenderer(SDL_Window *window, SDL_Renderer *renderer);
+IMGUI_IMPL_API bool ImGui_ImplSDL2_InitForOther(SDL_Window *window);
+IMGUI_IMPL_API void ImGui_ImplSDL2_Shutdown();
+IMGUI_IMPL_API void ImGui_ImplSDL2_NewFrame();
+IMGUI_IMPL_API void ImGui_ImplSDL2_NewFrame(SDL_Window *window);
+IMGUI_IMPL_API void ImGui_ImplSDL2_WaitForEvent();
+IMGUI_IMPL_API bool ImGui_ImplSDL2_ProcessEvent(const SDL_Event *event);
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-static inline void ImGui_ImplSDL2_NewFrame(SDL_Window*) { ImGui_ImplSDL2_NewFrame(); } // 1.84: removed unnecessary parameter
+static inline void ImGui_ImplSDL2_NewFrame(SDL_Window *)
+{
+    ImGui_ImplSDL2_NewFrame();
+} // 1.84: removed unnecessary parameter
 #endif
 
 #endif // #ifndef IMGUI_DISABLE

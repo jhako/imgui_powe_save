@@ -68,12 +68,16 @@
 #ifndef IMGUI_DISABLE
 #include "imgui_impl_glfw.h"
 
+<<<<<<< HEAD
 // Clang warnings with -Weverything
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"     // warning: use of old-style cast
 #pragma clang diagnostic ignored "-Wsign-conversion"    // warning: implicit conversion changes signedness
 #endif
+=======
+#include <math.h> // isinf
+>>>>>>> d5a60b38... Added power save mode
 
 // GLFW
 #include <GLFW/glfw3.h>
@@ -111,6 +115,22 @@ enum GlfwClientApi
     GlfwClientApi_OpenGL,
     GlfwClientApi_Vulkan
 };
+<<<<<<< HEAD
+=======
+static GLFWwindow*          g_Window = NULL;    // Main window
+static GlfwClientApi        g_ClientApi = GlfwClientApi_Unknown;
+static double               g_Time = 0.0;
+static bool                 g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
+static GLFWcursor*          g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
+static bool                 g_InstalledCallbacks = false;
+
+// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
+static GLFWmousebuttonfun   g_PrevUserCallbackMousebutton = NULL;
+static GLFWscrollfun        g_PrevUserCallbackScroll = NULL;
+static GLFWcursorposfun     g_PrevUserCallbackCursorPos = NULL;
+static GLFWkeyfun           g_PrevUserCallbackKey = NULL;
+static GLFWcharfun          g_PrevUserCallbackChar = NULL;
+>>>>>>> d5a60b38... Added power save mode
 
 struct ImGui_ImplGlfw_Data
 {
@@ -275,6 +295,7 @@ static ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int key)
     }
 }
 
+<<<<<<< HEAD
 // X11 does not include current pressed/released modifier key in 'mods' flags submitted by GLFW
 // See https://github.com/ocornut/imgui/issues/6034 and https://github.com/glfw/glfw/issues/1630
 static void ImGui_ImplGlfw_UpdateKeyModifiers(GLFWwindow* window)
@@ -284,6 +305,13 @@ static void ImGui_ImplGlfw_UpdateKeyModifiers(GLFWwindow* window)
     io.AddKeyEvent(ImGuiMod_Shift, (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)   == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT)   == GLFW_PRESS));
     io.AddKeyEvent(ImGuiMod_Alt,   (glfwGetKey(window, GLFW_KEY_LEFT_ALT)     == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT)     == GLFW_PRESS));
     io.AddKeyEvent(ImGuiMod_Super, (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)   == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SUPER)   == GLFW_PRESS));
+=======
+    ImGuiIO& io = ImGui::GetIO();
+    io.FrameCountSinceLastInput = 0;
+
+    if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(g_MouseJustPressed))
+        g_MouseJustPressed[button] = true;
+>>>>>>> d5a60b38... Added power save mode
 }
 
 static bool ImGui_ImplGlfw_ShouldChainCallback(GLFWwindow* window)
@@ -301,11 +329,32 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int acti
     ImGui_ImplGlfw_UpdateKeyModifiers(window);
 
     ImGuiIO& io = ImGui::GetIO();
+<<<<<<< HEAD
     if (button >= 0 && button < ImGuiMouseButton_COUNT)
         io.AddMouseButtonEvent(button, action == GLFW_PRESS);
 }
 
 void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+=======
+    io.FrameCountSinceLastInput = 0;
+    io.MouseWheelH += (float)xoffset;
+    io.MouseWheel += (float)yoffset;
+}
+
+void ImGui_ImplGlfw_CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (g_PrevUserCallbackCursorPos != NULL)
+        g_PrevUserCallbackCursorPos(window, xpos, ypos);
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.FrameCountSinceLastInput = 0;
+
+    // Here, we just take note of the event without actually processing the cursor position.
+    // This is done in ImGui_ImplGlfw_NewFrame() / ImGui_ImplGlfw_UpdateMousePosAndButtons().
+}
+
+void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+>>>>>>> d5a60b38... Added power save mode
 {
     ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
     if (bd->PrevUserCallbackScroll != nullptr && ImGui_ImplGlfw_ShouldChainCallback(window))
@@ -317,6 +366,7 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yo
 #endif
 
     ImGuiIO& io = ImGui::GetIO();
+<<<<<<< HEAD
     io.AddMouseWheelEvent((float)xoffset, (float)yoffset);
 }
 
@@ -347,6 +397,21 @@ static int ImGui_ImplGlfw_TranslateUntranslatedKey(int key, int scancode)
         else if (const char* p = strchr(char_names, key_name[0]))   { key = char_keys[p - char_names]; }
     }
     // if (action == GLFW_PRESS) printf("key %d scancode %d name '%s'\n", key, scancode, key_name);
+=======
+    io.FrameCountSinceLastInput = 0;
+
+    if (action == GLFW_PRESS)
+        io.KeysDown[key] = true;
+    if (action == GLFW_RELEASE)
+        io.KeysDown[key] = false;
+
+    // Modifiers are not reliable across systems
+    io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+    io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+    io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+#ifdef _WIN32
+    io.KeySuper = false;
+>>>>>>> d5a60b38... Added power save mode
 #else
     IM_UNUSED(scancode);
 #endif
@@ -422,6 +487,7 @@ void ImGui_ImplGlfw_CharCallback(GLFWwindow* window, unsigned int c)
         bd->PrevUserCallbackChar(window, c);
 
     ImGuiIO& io = ImGui::GetIO();
+    io.FrameCountSinceLastInput = 0;
     io.AddInputCharacter(c);
 }
 
@@ -577,6 +643,7 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 
     // Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
     if (install_callbacks)
+<<<<<<< HEAD
         ImGui_ImplGlfw_InstallCallbacks(window);
     // Register Emscripten Wheel callback to workaround issue in Emscripten GLFW Emulation (#6096)
     // We intentionally do not check 'if (install_callbacks)' here, as some users may set it to false and call GLFW callback themselves.
@@ -584,6 +651,16 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 #ifdef __EMSCRIPTEN__
     emscripten_set_wheel_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, false, ImGui_ImplEmscripten_WheelCallback);
 #endif
+=======
+    {
+        g_InstalledCallbacks = true;
+        g_PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(window, ImGui_ImplGlfw_MouseButtonCallback);
+        g_PrevUserCallbackScroll = glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
+        g_PrevUserCallbackCursorPos = glfwSetCursorPosCallback(window, ImGui_ImplGlfw_CursorPosCallback);
+        g_PrevUserCallbackKey = glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
+        g_PrevUserCallbackChar = glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
+    }
+>>>>>>> d5a60b38... Added power save mode
 
     // Set platform dependent data in viewport
     ImGuiViewport* main_viewport = ImGui::GetMainViewport();
@@ -646,7 +723,27 @@ void ImGui_ImplGlfw_Shutdown()
     IM_DELETE(bd);
 }
 
+<<<<<<< HEAD
 static void ImGui_ImplGlfw_UpdateMouseData()
+=======
+void ImGui_ImplGlfw_WaitForEvent()
+{
+    if (!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_EnablePowerSavingMode))
+        return;
+
+    bool window_is_hidden = !glfwGetWindowAttrib(g_Window, GLFW_VISIBLE) || glfwGetWindowAttrib(g_Window, GLFW_ICONIFIED);
+    double waiting_time = window_is_hidden ? INFINITY : ImGui::GetEventWaitingTime();
+    if (waiting_time > 0.0)
+    {
+        if (isinf(waiting_time))
+            glfwWaitEvents();
+        else
+            glfwWaitEventsTimeout(waiting_time);
+    }
+}
+
+static void ImGui_ImplGlfw_UpdateMousePosAndButtons()
+>>>>>>> d5a60b38... Added power save mode
 {
     ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
     ImGuiIO& io = ImGui::GetIO();

@@ -160,7 +160,12 @@ int main(int, char**)
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
 
+<<<<<<< HEAD:examples/example_sdl2_opengl3/main.cpp
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+=======
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Text("Frames since last input: %d", ImGui::GetIO().FrameCountSinceLastInput);
+>>>>>>> d5a60b38... Added power save mode:examples/example_sdl_opengl3/main.cpp
             ImGui::End();
         }
 
